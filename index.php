@@ -7,9 +7,11 @@ require __DIR__ . '/utils/header.php';
 
 $request_painel = $_SERVER;
 $request_body = file_get_contents('php://input');
+$request_method_especial = array_search($request_painel['REQUEST_METHOD'], ['POST', 'PATCH']);
 $request_replace_path = str_replace(GATEWAY_PATH, "", $request_painel['REQUEST_URI']);
 $request_endpoint = API_PATH . $request_replace_path;
 $request_api = curl_init();
+
 
 try {
     curl_setopt_array($request_api, [
@@ -18,9 +20,9 @@ try {
         CURLOPT_RETURNTRANSFER => true,
     ]);
 
-    if (isset($request_painel) && $request_painel['REQUEST_METHOD'] == 'POST') {
+    if (isset($request_painel) &&  $request_method_especial >= 0) {
         curl_setopt_array($request_api, [
-            CURLOPT_POST       => true,
+            CURLOPT_CUSTOMREQUEST  => $request_painel['REQUEST_METHOD'],
             CURLOPT_POSTFIELDS => $request_body,
         ]);
     } else {
