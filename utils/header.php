@@ -1,31 +1,22 @@
 <?php
 
-function getHeaderAuth(){
-    $headers = null;
+function getHeaderAuth() {
+    if (isset($_SERVER['Authorization'])) return trim($_SERVER['Authorization']);
+    
+    if (isset($_SERVER['HTTP_AUTHORIZATION'])) return trim($_SERVER['HTTP_AUTHORIZATION']);
+    
+    if (function_exists('apache_request_headers')) {
+        $requestHeaders = array_combine(array_map('ucwords', array_keys(apache_request_headers())), apache_request_headers());
+        if (isset($requestHeaders['Authorization'])) return trim($requestHeaders['Authorization']);
+    }
 
-    if (isset($_SERVER['Authorization'])) :
-        $headers = trim($_SERVER["Authorization"]);
-    elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) :
-        $headers = trim($_SERVER["HTTP_AUTHORIZATION"]);
-    elseif (function_exists('apache_request_headers')) :
-        $requestHeaders = apache_request_headers();
-        $requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
-        
-        if (isset($requestHeaders['Authorization'])) :
-            $headers = trim($requestHeaders['Authorization']);
-        endif;
-    endif;
-
-    return $headers;
+    return null;
 }
 
 function getToken() {
-    $headers = getHeaderAuth();
+    if ($headers = getHeaderAuth()) {
+        if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) return $matches[1];
+    }
 
-    if (!empty($headers)) :
-        if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) :
-            return $matches[1];
-        endif;
-    endif;
     return null;
 }

@@ -1,4 +1,4 @@
 <?php
 
-define('HOST_PATH', "");
-define('BASE_URL', "");
+define('API_PATH', "http://localhost:1236/api");
+define('GATEWAY_PATH', "/gateway");
